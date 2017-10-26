@@ -1,0 +1,14 @@
+So, we were trying to figure out how to make API calls from the arduino. 
+We now have a way for that as long as its connected to the internet.
+	https://www.arduino.cc/en/Tutorial/HttpClient
+The resource above is from the official arduino site. Should help us get the ball rolling. 
+
+Then came the question of parsing what we get: JSON. Didn't know that this was initially.
+Got acquainted with it through these sites:
+	http://www.json.org
+	http://hardwarefun.com/tutorials/parsing-json-in-arduino
+	https://bblanchon.github.io/ArduinoJson/doc/decoding/
+
+The first one is an intro to JSON and the last two are "tutorials" on how to decode them. 
+
+This is part of the evolutionary prototype, aimed at exposing us to what we're going to be working with. 
