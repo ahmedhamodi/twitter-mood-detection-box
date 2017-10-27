@@ -1,6 +1,3 @@
-<<<<<<< HEAD
 jetafese
-=======
 bmselby
 arhamodi
->>>>>>> 7fdfc744a3764d727ec1b9c4643fcfd38a923cc7
