@@ -12,9 +12,25 @@ headers = {'content-type': 'application/json', 'accept': 'application/json', 'us
 params = {'version': '2017-02-27'}
 data = json.dumps({"clean": True, "features": features, "fallback_to_raw": True, "text": text, "return_analyzed_text": False})
 
-response = requests.request(method="POST", url=base_url + url, auth=(username, password), headers=headers, params=params, data=data).json()["emotion"]["document"]["emotion"]
+response = requests.Request(method="POST", url=base_url + url, auth=(username, password), headers=headers, params=params, data=data)
 
-response = [emotion + ": " + str(response[emotion]) for emotion in sorted(list(response.keys()))]
+def pretty_print_POST(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
 
-print("\n".join(response))
+    However pay attention at the formatting used in 
+    this function because it is programmed to be pretty 
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
+
+pretty_print_POST(response.prepare())
+
+\
 
