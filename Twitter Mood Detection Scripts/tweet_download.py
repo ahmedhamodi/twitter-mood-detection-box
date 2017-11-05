@@ -30,8 +30,13 @@ class listener(StreamListener):
     def on_data(self, data):
         try:
             with open(self.outfile, 'a') as f:
-                f.write(data)
-                print(data)
+                if ('"text":"' in data):
+                    print(data)
+                    start = '"text":"'
+                    end = '","'
+                    data2 = ((data.split(start))[1].split(end)[0])
+                    f.write(data2 + "\n\n")
+                    print(data2)
                 return True
         except BaseException as e:
             print("Error on_data: %s" % str(e))
