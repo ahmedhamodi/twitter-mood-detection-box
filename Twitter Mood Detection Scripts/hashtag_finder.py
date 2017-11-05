@@ -1,5 +1,6 @@
 import tweepy, time, sys, json
 from tweepy import OAuthHandler
+import os
 
 # argfile = str(sys.argv[0])
 
@@ -17,11 +18,21 @@ api = tweepy.API(auth)
 # filename.close()
 
 trends1 = api.trends_place(1)
-print (trends1)
+# print (trends1)
 hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
-# print hashtags
-for hashtag in hashtags:
-    print(hashtag)
+
+#stores hashtags in subdirectory
+if (os.path.exists("hashtags/trending_hashtags.txt")):
+    os.remove("hashtags/trending_hashtags.txt")
+outfile = "hashtags/trending_hashtags.txt"
+with open(outfile, 'a') as f:
+    for hashtag in hashtags:
+        try:
+            f.write(hashtag + "\n")
+            print(hashtag)
+        except BaseException as e:
+            print("Error on_data: %s" % str(e))
+
 # trend_hashtag = hashtags[0]
 # api.update_status(line + ' ' + trend_hashtag)
 time.sleep(1800)
