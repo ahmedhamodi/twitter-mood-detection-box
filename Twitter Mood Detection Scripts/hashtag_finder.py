@@ -35,4 +35,3 @@ with open(outfile, 'a') as f:
 
 # trend_hashtag = hashtags[0]
 # api.update_status(line + ' ' + trend_hashtag)
-time.sleep(1800)
