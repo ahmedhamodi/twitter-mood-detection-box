@@ -24,8 +24,8 @@ def get_parser():
 
 class listener(StreamListener):
     def __init__(self, query):
-        query_fname = format_filename(query)
-        self.outfile = "data/output-%s.json" % (query_fname)
+        # query_fname = format_filename(query)
+        self.outfile = "data/output.txt"
 
     def on_data(self, data):
         try:
@@ -74,3 +74,4 @@ if __name__ == '__main__':
 
     twitter_stream = Stream(auth, listener(args.query))
     twitter_stream.filter(track=[args.query])
+    # filter based on hashtags from a text file
