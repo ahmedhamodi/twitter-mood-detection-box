@@ -5,6 +5,8 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 
 import time
+import os
+import sys
 import argparse
 import string
 import json
@@ -33,21 +35,21 @@ id_headers = {'content-type': 'text/plain', 'accept': 'application/json', 'user-
 
 
 
-#Parse command line arguments
-def get_parser():
-    parser = argparse.ArgumentParser(description="Tweet Downloader")
-    parser.add_argument("-q",
-                        "--query",
-                        dest="query",
-                        help="Query/Filter",
-                        default='-')
-    return parser
+# #Parse command line arguments
+# def get_parser():
+#     parser = argparse.ArgumentParser(description="Tweet Downloader")
+#     parser.add_argument("-q",
+#                         "--query",
+#                         dest="query",
+#                         help="Query/Filter",
+#                         default='-')
+#     return parser
 
 #Listen to stream of tweets
 class Listener(StreamListener):
-    def __init__(self, query):
+    def __init__(self):
         # query_fname = format_filename(query)
-        self.outfile = "data/output.txt"
+        # self.outfile = "data/output.txt"
         self.tweets = [[]]
 
     def on_data(self, data):
@@ -71,9 +73,9 @@ class Listener(StreamListener):
             if len(self.tweets[-1]) > 10:
                 emotions = self.get_emotional_content()["emotion"]["document"]["emotion"]
                 print(self.sort_dict_by_values(emotions))
-                print()
-                if max(list(emotions.values())) > 0.15:
-                    print("\n<><><><>\n".join(self.tweets[-2]))
+                # print()
+                # if max(list(emotions.values())) > 0.15:
+                    # print("\n\n<><><><>\n\n".join(self.tweets[-2]))
                 # print(self.get_emotional_content())
                 return False
         except BaseException as e:
@@ -120,19 +122,6 @@ class Listener(StreamListener):
         else:
             return data["text"]
 
-
-
-def format_filename(fname):
-    return ''.join(convert_valid(one_char) for one_char in fname)
-
-
-def convert_valid(one_char):
-    valid_chars = "-_.%s%s" % (string.ascii_letters, string.digits)
-    if one_char in valid_chars:
-        return one_char
-    else:
-        return ''
-
 @classmethod
 def parse(cls, api, raw):
     status = cls.first_parse(api, raw)
@@ -140,14 +129,37 @@ def parse(cls, api, raw):
     return status
 
 if __name__ == '__main__':
-    parser = get_parser()
-    args = parser.parse_args()
+    # parser = get_parser()
+    # args = parser.parse_args()
+    args = "Namespace(query=\'"
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     api = tweepy.API(auth)
 
-    twitter_stream = Stream(auth, Listener(args.query))
-    twitter_stream.filter(track=[args.query], async=True)
+    trends1 = api.trends_place(1)
+    # print (trends1)
+    hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
+
+    # stores hashtags in subdirectory
+    if (os.path.exists("hashtags/trending_hashtags.txt")):
+        os.remove("hashtags/trending_hashtags.txt")
+    outfile = "hashtags/trending_hashtags.txt"
+    with open(outfile, 'a') as f:
+        for hashtag in hashtags:
+            try:
+                # necessary write command - automatically filters out incompatible hashtags
+                f.write(hashtag + "\n")
+                # print(hashtag)
+                args += hashtag + ","
+            except BaseException as e:
+                # print("Invalid Hashtag (foreign language, unsupported characters, etc): %s" % str(e))
+                pass
+
+    args = args[:-1]
+    args += "\')"
+    # print(args)
+    twitter_stream = Stream(auth, Listener())
+    twitter_stream.filter(track=[args], async=True)
     # twitter_stream = Stream(auth, Listener("Trump"), tweet_mode='extended')
     # twitter_stream.filter(track=["Trump"], async=True)
     # filter based on hashtags from a text file
