@@ -12,6 +12,11 @@ import string
 import json
 import requests
 
+import serial
+import serial.tools.list_ports
+
+
+printables = set(string.printable)
 
 #Twitter API information
 ckey = '5dQSN5EqZYQTkbrFy75wmzteV'
@@ -32,6 +37,12 @@ id_username = '526124a9-0918-44f0-9eba-4562e85d0e10'
 id_password = 'zHiVLqvEC3kw'
 id_url = '/language-translator/api/v2/identify'
 id_headers = {'content-type': 'text/plain', 'accept': 'application/json', 'user-agent': 'watson-developer-cloud-python-0.26.1'}
+
+#Setup arduino port
+ports = list(serial.tools.list_ports.comports())
+port = ports[0][0]
+arduino = serial.Serial(port, 9600)
+arduino.flush()
 
 
 
@@ -65,21 +76,24 @@ class Listener(StreamListener):
             tweet = self.get_tweet(data)
             # print(self.get_language(tweet)[:5])
             # print(self.is_english(tweet))
-            # print(tweet)
             # print()
             if self.is_english(tweet):
+                # print(tweet)
                 self.tweets[-1].append(tweet)
             # print(self.tweets[-1])
             if len(self.tweets[-1]) > 10:
                 emotions = self.get_emotional_content()["emotion"]["document"]["emotion"]
-                print(self.sort_dict_by_values(emotions))
-                # print()
-                # if max(list(emotions.values())) > 0.15:
-                    # print("\n\n<><><><>\n\n".join(self.tweets[-2]))
+                sorted_emotions = self.sort_dict_by_values(emotions)
+                print(sorted_emotions)
+                print()
+                arduino.write((sorted_emotions[0][0][:1]+str(sorted_emotions[0][1])).encode())
+                if max(list(emotions.values())) > 0.0:
+                    print("\n<><><><>\n".join(self.tweets[-2]))
                 # print(self.get_emotional_content())
                 return False
         except BaseException as e:
             print("Error on_data: %s" % str(e))
+            # print(self.tweets[-1])
             time.sleep(5)
         return True
 
@@ -92,7 +106,9 @@ class Listener(StreamListener):
 
     #Gets emotional content from IBM Watson
     def get_emotional_content(self):
+        # print(self.tweets[-1])
         data = {"clean": True, "features": features, "fallback_to_raw": True, "return_analyzed_text": False, "text":"\n".join(self.tweets[-1])}
+        # print(data["text"])
         self.tweets.append([])
         response = requests.request(method="POST", url=base_url + em_url, auth=(em_username, em_password), headers=em_headers, params=params, data=json.dumps(data)).json()
         return response
@@ -105,22 +121,29 @@ class Listener(StreamListener):
 
     #Determines if a tweet is in English
     def is_english(self, tweet):
+        if len(list(filter(lambda x: x in printables, tweet)))/len(tweet) < 0.75:
+            return False
         langs = self.get_language(tweet)
         for lang in langs:
-            if lang["language"] == 'en' and lang['confidence'] > 1/3:
+            if lang["language"] == 'en' and lang['confidence'] > 1/2:
                 return True
         return False
 
     #If a tweet is a retweet, the RT portion at the start may cause the text of the tweet to be longer than the character limit, and will subsequently be cut off by Twitter.
     #In order to get the full text, you have to check if it is a retweet first, then get the full text from the appropriate key.
     def get_tweet(self, data):
+        # print("text", "text" in list(data.keys()))
+        # print("retweeted_status", "retweeted_status" in list(data.keys()))
         if "retweeted_status" in list(data.keys()):
             if "extended_tweet" in list(data["retweeted_status"].keys()):
                 return data["retweeted_status"]["extended_tweet"]["full_text"]
             else:
                 return data["retweeted_status"]["text"]
-        else:
+        elif "text" in list(data.keys()):
             return data["text"]
+        else:
+            # print(data)
+            return "null"
 
 @classmethod
 def parse(cls, api, raw):
@@ -136,30 +159,33 @@ if __name__ == '__main__':
     auth.set_access_token(atoken, asecret)
     api = tweepy.API(auth)
 
-    trends1 = api.trends_place(1)
-    # print (trends1)
-    hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
+    for i in range(60):
+        trends1 = api.trends_place(1)
+        # print (trends1)
+        hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
 
-    # stores hashtags in subdirectory
-    if (os.path.exists("hashtags/trending_hashtags.txt")):
-        os.remove("hashtags/trending_hashtags.txt")
-    outfile = "hashtags/trending_hashtags.txt"
-    with open(outfile, 'a') as f:
-        for hashtag in hashtags:
-            try:
-                # necessary write command - automatically filters out incompatible hashtags
-                f.write(hashtag + "\n")
-                # print(hashtag)
-                args += hashtag + ","
-            except BaseException as e:
-                # print("Invalid Hashtag (foreign language, unsupported characters, etc): %s" % str(e))
-                pass
+        # stores hashtags in subdirectory
+        if (os.path.exists("hashtags/trending_hashtags.txt")):
+            os.remove("hashtags/trending_hashtags.txt")
+        outfile = "hashtags/trending_hashtags.txt"
+        with open(outfile, 'a') as f:
+            for hashtag in hashtags:
+                try:
+                    # necessary write command - automatically filters out incompatible hashtags
+                    f.write(hashtag + "\n")
+                    # print(hashtag)
+                    args += hashtag + ","
+                except BaseException as e:
+                    # print("Invalid Hashtag (foreign language, unsupported characters, etc): %s" % str(e))
+                    pass
 
-    args = args[:-1]
-    args += "\')"
-    # print(args)
-    twitter_stream = Stream(auth, Listener())
-    twitter_stream.filter(track=[args], async=True)
-    # twitter_stream = Stream(auth, Listener("Trump"), tweet_mode='extended')
-    # twitter_stream.filter(track=["Trump"], async=True)
-    # filter based on hashtags from a text file
+        args = args[:-1]
+        args += "\')"
+        # print(args)
+        twitter_stream = Stream(auth, Listener())
+        twitter_stream.filter(track=[args], async=True)
+        time.sleep(60)
+        # twitter_stream = Stream(auth, Listener("Trump"), tweet_mode='extended')
+        # twitter_stream.filter(track=["Trump"], async=True)
+        # filter based on hashtags from a text file
+    arduino.close()
