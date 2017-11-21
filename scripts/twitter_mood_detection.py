@@ -29,12 +29,12 @@ features = {"emotion": {}}
 version = '2017-02-27'
 base_url = 'https://gateway.watsonplatform.net'
 params = {'version': '2017-02-27'}
-em_username = '7caf2a5f-b43f-4179-bcaf-48c639026d99'
-em_password = 'x715aBvw1aYC'
+em_username = 'ee044af5-a83d-4479-b842-60be22b3d000'
+em_password = 'bnEm6EWhVdQs'
 em_url = '/natural-language-understanding/api/v1/analyze'
 em_headers = {'content-type': 'application/json', 'accept': 'application/json', 'user-agent': 'watson-developer-cloud-python-0.26.1'}
-id_username = '526124a9-0918-44f0-9eba-4562e85d0e10'
-id_password = 'zHiVLqvEC3kw'
+id_username = 'e2a6b2c1-46d8-49de-bf14-95d411285610'
+id_password = 'U0ce6zmraYjM'
 id_url = '/language-translator/api/v2/identify'
 id_headers = {'content-type': 'text/plain', 'accept': 'application/json', 'user-agent': 'watson-developer-cloud-python-0.26.1'}
 
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     auth.set_access_token(atoken, asecret)
     api = tweepy.API(auth)
 
-    for i in range(60):
+    for i in range(10):
         trends1 = api.trends_place(1)
         # print (trends1)
         hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
@@ -184,7 +184,7 @@ if __name__ == '__main__':
         # print(args)
         twitter_stream = Stream(auth, Listener())
         twitter_stream.filter(track=[args], async=True)
-        time.sleep(60)
+        time.sleep(30)
         # twitter_stream = Stream(auth, Listener("Trump"), tweet_mode='extended')
         # twitter_stream.filter(track=["Trump"], async=True)
         # filter based on hashtags from a text file
