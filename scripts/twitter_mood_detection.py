@@ -58,10 +58,18 @@ class Listener(StreamListener):
             #When 10 tweets have been received
             if len(self.tweets[-1]) >= 10:
                 emotions = self.get_emotional_content()["emotion"]["document"]["emotion"]
+
+                #Scale emotional values
+                emotions["anger"] += 0.1867141506/2
+                emotions["disgust"] += 0.1158268397/2
+                emotions["fear"] += 0.3500829744/2
+                emotions["joy"] += 0
+                emotions["sadness"] += 0.1070324615/2
                 sorted_emotions = self.sort_dict_by_values(emotions)
                 print(sorted_emotions)
                 print()
                 print("\n<><><><>\n".join(self.tweets[-2]))
+                print()
                 arduino.write((sorted_emotions[0][0][:1]+str(sorted_emotions[0][1])).encode())                    
                 return False
         except BaseException as e:
