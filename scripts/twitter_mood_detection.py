@@ -27,12 +27,12 @@ features = {"emotion": {}}
 version = '2017-02-27'
 base_url = 'https://gateway.watsonplatform.net'
 params = {'version': '2017-02-27'}
-em_username = 'ee044af5-a83d-4479-b842-60be22b3d000'
-em_password = 'bnEm6EWhVdQs'
+em_username = '6c7f54db-a128-4248-8969-ce10eeede157'
+em_password = 'OHQMSbdEC2wj'
 em_url = '/natural-language-understanding/api/v1/analyze'
 em_headers = {'content-type': 'application/json', 'accept': 'application/json', 'user-agent': 'watson-developer-cloud-python-0.26.1'}
-id_username = 'e2a6b2c1-46d8-49de-bf14-95d411285610'
-id_password = 'U0ce6zmraYjM'
+id_username = 'f6beacdd-c132-4add-ae11-aa35f3e4304a'
+id_password = 'APNcey2h7hYG'
 id_url = '/language-translator/api/v2/identify'
 id_headers = {'content-type': 'text/plain', 'accept': 'application/json', 'user-agent': 'watson-developer-cloud-python-0.26.1'}
 
