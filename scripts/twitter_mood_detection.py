@@ -56,7 +56,7 @@ class Listener(StreamListener):
                 self.tweets[-1].append(tweet)
 
             #When 10 tweets have been received
-            if len(self.tweets[-1]) >= 10:
+            if len(self.tweets[-1]) >= 2:
                 emotions = self.get_emotional_content()["emotion"]["document"]["emotion"]
 
                 #Scale emotional values
@@ -137,19 +137,22 @@ if __name__ == '__main__':
         #Get trending hashtags
         trends1 = api.trends_place(1)
         hashtags = [x['name'] for x in trends1[0]['trends'] if x['name'].startswith('#')]
-        if (os.path.exists("hashtags/trending_hashtags.txt")):
-            os.remove("hashtags/trending_hashtags.txt")
-        outfile = "hashtags/trending_hashtags.txt"
-        with open(outfile, 'a') as f:
-            for hashtag in hashtags:
-                try:
-                    # necessary write command - automatically filters out incompatible hashtags
-                    f.write(hashtag + "\n")
-                    # print(hashtag)
-                    args += hashtag + ","
-                except BaseException as e:
-                    print("Invalid Hashtag (foreign language, unsupported characters, etc): " + hashtag)
-                    pass
+        # if (os.path.exists("hashtags/trending_hashtags.txt")):
+        #     os.remove("hashtags/trending_hashtags.txt")
+        # outfile = "hashtags/trending_hashtags.txt"
+        # with open(outfile, 'a') as f:
+        #     for hashtag in hashtags:
+        #         try:
+        #             # necessary write command - automatically filters out incompatible hashtags
+        #             f.write(hashtag + "\n")
+        #             # print(hashtag)
+        #             args += hashtag + ","
+        #         except BaseException as e:
+        #             print("Invalid Hashtag (foreign language, unsupported characters, etc): " + hashtag)
+        #             pass
+
+        for hashtag in hashtags:
+        	args += hashtag + ","
 
         args = args[:-1]
         args += "\')"
